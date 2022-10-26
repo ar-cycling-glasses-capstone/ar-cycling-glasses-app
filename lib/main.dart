@@ -48,12 +48,14 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomePageState extends State<MyHomePage> {
   int _counter = 0;
+  int i = 0;
 
+  void onPressed() {}
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -65,6 +67,12 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void onBottomNavbarItemTap(int index) {
+    setState(() {
+      i = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -73,6 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -106,8 +115,27 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
             ),
+            ElevatedButton(onPressed: () {}, child: const Text('Setup'))
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.directions_bike),
+            label: 'Track',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Options',
+          ),
+        ],
+        currentIndex: i,
+        onTap: onBottomNavbarItemTap,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
