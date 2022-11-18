@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.indigo,
       ),
-      home: const MyHomePage(title: 'IceSight | AR Cycling Glasses'),
+      home: const MyHomePage(title: 'IceHawk AR'),
     );
   }
 }
