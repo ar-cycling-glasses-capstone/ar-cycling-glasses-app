@@ -26,9 +26,9 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.indigo,
+        primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'IceHawk AR'),
+      home: const MyHomePage(title: 'IceHawkAR'),
     );
   }
 }
@@ -86,7 +86,9 @@ class _HomePageState extends State<MyHomePage> {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Center(
+            child: Text(widget.title,
+                style: Theme.of(context).textTheme.bodyLarge)),
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
@@ -108,30 +110,42 @@ class _HomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            // const Text(
+            //   'You have pushed the button this many times:',
+            // ),
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: Text(
+                // '$_counter',
+                'Not Connected',
+                style: Theme.of(context).textTheme.headline4,
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            ElevatedButton(onPressed: () {}, child: const Text('Setup'))
+            // MaterialButton(onPressed: () {}),
+            ElevatedButton.icon(
+                icon: const Icon(
+                  // <-- Icon
+                  Icons.connect_without_contact_rounded,
+                  size: 24.0,
+                ),
+                onPressed: () {},
+                label: const Text('Connect to Glasses'))
           ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.directions_bike),
             label: 'Track',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: 'Options',
+            label: 'Settings',
           ),
         ],
         currentIndex: i,

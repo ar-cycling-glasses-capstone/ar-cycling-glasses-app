@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.ar_cycling_glasses_app">
    <application
-        android:label="ar_cycling_glasses_app"
+        android:label="IceHawkAR"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
