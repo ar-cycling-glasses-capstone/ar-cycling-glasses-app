@@ -1,9 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_blue/flutter_blue.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'about.dart';
+// import 'bluetooth/bluetooth-off-screen.dart';
+import 'dart:async';
+import 'dart:math';
+
+final FlutterBlue flutterBlue = FlutterBlue.instance;
+// enum BluetoothState { disabled, enabled, connected, disconnected, loading }
 
 void main() {
   runApp(const MyApp());
 }
+
+bool checkBluetoothStatus() {
+  return true;
+}
+
+// class BluetoothOffScreen extends StatelessWidget {
+//   const BluetoothOffScreen({Key? key, this.state}) : super(key: key);
+
+//   final BluetoothState? state;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Colors.lightBlue,
+//       body: Center(
+//         child: Column(
+//           // mainAxisSize: MainAxisSize.min,
+//           children: <Widget>[
+//             const Icon(
+//               Icons.bluetooth_disabled,
+//               size: 200.0,
+//               color: Colors.white54,
+//             ),
+//             Text(
+//               'Bluetooth Adapter is ${state != null ? state.toString().substring(15) : 'not available'}.',
+//               style: Theme.of(context)
+//                   .primaryTextTheme
+//                   .subtitle1
+//                   ?.copyWith(color: Colors.white),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -28,13 +72,13 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'IceHawkAR'),
+      home: MyHomePage(title: 'IceHawkAR'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  MyHomePage({super.key, required this.title});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -44,6 +88,8 @@ class MyHomePage extends StatefulWidget {
   // case the title) provided by the parent (in this case the App widget) and
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
+  final FlutterBlue flutterBlue = FlutterBlue.instance;
+  final List<BluetoothDevice> devicesList = <BluetoothDevice>[];
 
   final String title;
 
@@ -52,24 +98,103 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  int i = 0;
+  int bottomNavbarIndex = 0;
+
+  _addDeviceTolist(final BluetoothDevice device) {
+    if (!widget.devicesList.contains(device)) {
+      setState(() {
+        widget.devicesList.add(device);
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    widget.flutterBlue.connectedDevices
+        .asStream()
+        .listen((List<BluetoothDevice> devices) {
+      for (BluetoothDevice device in devices) {
+        _addDeviceTolist(device);
+      }
+    });
+    widget.flutterBlue.scanResults.listen((List<ScanResult> results) {
+      for (ScanResult result in results) {
+        _addDeviceTolist(result.device);
+      }
+    });
+    widget.flutterBlue.startScan();
+  }
+
+  // FOR BLUETOOTH
+  ListView _buildListViewOfDevices() {
+    List<Widget> containers = <Widget>[];
+    // widget.devicesList
+    for (BluetoothDevice device in widget.devicesList) {
+      containers.add(
+        SizedBox(
+          height: 50,
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(device.name == '' ? '(unknown device)' : device.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold)
+                        // style: const TextStyle(
+                        //   fontWeight: FontWeight.bold,
+                        // ),
+                        ),
+                    Text(device.id.toString()),
+                  ],
+                ),
+              ),
+              ElevatedButton(
+                // color: Colors.blue,
+                child: const Text(
+                  'Connect',
+                  // style: TextStyle(color: Colors.white),
+                ),
+                onPressed: () {},
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: <Widget>[
+        ...containers,
+      ],
+    );
+  }
+
+  static const TextStyle optionStyle =
+      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static const List<Widget> _widgetOptions = <Widget>[
+    Text(
+      'Index 0: Home',
+      style: optionStyle,
+    ),
+    Text(
+      'Index 1: Business',
+      style: optionStyle,
+    ),
+    Text(
+      'Index 2: School',
+      style: optionStyle,
+    ),
+  ];
+  // late BluetoothState bluetoothState;
 
   void onPressed() {}
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
 
   void onBottomNavbarItemTap(int index) {
     setState(() {
-      i = index;
+      bottomNavbarIndex = index;
     });
   }
 
@@ -86,10 +211,24 @@ class _HomePageState extends State<MyHomePage> {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Center(
-            child: Text(widget.title,
-                style: Theme.of(context).textTheme.bodyLarge)),
+        title: Row(
+          children: [
+            GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AboutView()));
+                },
+                child: Image.asset('assets/icon/icon.png', height: 25)),
+
+            // Text(widget.title, style: Theme.of(context).textTheme.bodyLarge),
+            const Spacer(),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.settings))
+          ],
+        ),
       ),
+      // body: _buildListViewOfDevices(),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
@@ -110,13 +249,14 @@ class _HomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            _widgetOptions.elementAt(bottomNavbarIndex),
+            // const BluetoothOffScreen(),
             // const Text(
             //   'You have pushed the button this many times:',
             // ),
             Padding(
               padding: const EdgeInsets.all(15),
               child: Text(
-                // '$_counter',
                 'Not Connected',
                 style: Theme.of(context).textTheme.headline4,
               ),
@@ -125,7 +265,7 @@ class _HomePageState extends State<MyHomePage> {
             ElevatedButton.icon(
                 icon: const Icon(
                   // <-- Icon
-                  Icons.connect_without_contact_rounded,
+                  Icons.device_hub_outlined,
                   size: 24.0,
                 ),
                 onPressed: () {},
@@ -144,15 +284,15 @@ class _HomePageState extends State<MyHomePage> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
-        currentIndex: i,
+        currentIndex: bottomNavbarIndex,
         onTap: onBottomNavbarItemTap,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: () {},
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
